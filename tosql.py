@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 # import dataframe gastos
 df = pd.read_excel("C:/Users/julio/OneDrive/Documentos/codes/vidhya/gastosPY.xlsx")
 #list columns
