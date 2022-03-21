@@ -1,0 +1,18 @@
+-- Table creation
+CREATE TABLE operations (
+		id INTEGER,
+		date DATE,
+		price DECIMAL(8,4),
+		installment INTEGER,
+		product_id INTEGER,
+		category_id INTEGER,
+		destination_id INTEGER,
+		buytype_id INTEGER,
+		account_id INTEGER,
+		CONSTRAINT pk_operation_id PRIMARY KEY(id)
+		);
+CREATE TABLE products (
+		id INTEGER,
+		name VARCHAR(45),
+		CONSTRAINT pk_product_id PRIMARY KEY(id)
+		);

@@ -1,0 +1,8 @@
+-- Criação das constraints; foreign keys
+ALTER TABLE operations
+		ADD CONSTRAINT fk_products_id FOREIGN KEY (product_id) REFERENCES products (id),
+		ADD CONSTRAINT fk_categories_id FOREIGN KEY (category_id) REFERENCES categories (id),
+		ADD CONSTRAINT fk_destinations_id FOREIGN KEY (destination_id) REFERENCES destinations (id),
+		ADD CONSTRAINT fk_buytypes_id FOREIGN KEY (buytype_id) REFERENCES buytypes (id),
+		ADD CONSTRAINT fk_accounts_id FOREIGN KEY (account_id) REFERENCES accounts (id)
+		;
