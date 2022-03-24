@@ -1,0 +1,83 @@
+-- Alguns querys:
+-- 1. Apresenta as colunas de preço, nome do produto e nome da categoria.
+SELECT CAST (op.price AS numeric (8,2)), p.name, c.name
+FROM operations op
+INNER JOIN products p ON op.product_id = p.id
+INNER JOIN categories c ON op.category_id = c.id
+;
+
+-- 2. Lista as categorias que possuíram 2 ou mais operações, apresenta o total dos gastos e o ticket médio.
+SELECT c.name AS "Categoria", SUM(op.price) AS Gasto, CAST (SUM(op.price)/COUNT(op.id) AS numeric (8,2)) AS "Média Por Operacao"
+FROM operations op
+INNER JOIN categories c ON op.category_id = c.id
+GROUP BY c.name
+HAVING COUNT(op.id) >= 2
+;
+
+-- 3. Retorna as operações dentro das categorias, seus valores individuais e cumulativos, e a porcentagem que cada operação representa dentro da própria categoria
+SELECT c.name AS "Categoria", op.price AS "Preço", 
+	CAST(ROW_NUMBER() OVER (PARTITION BY c.name ORDER BY op.price DESC) AS INTEGER) AS "Numero Coluna",
+	CAST(SUM(op.price) OVER (PARTITION BY c.name ORDER BY op.price DESC ROWS UNBOUNDED PRECEDING) AS DECIMAL (8,2)) AS "Cumulativo",
+	CAST(op.price/SUM(op.price) OVER (PARTITION BY c.name) AS DECIMAL (8,3))*100 as "Porcentagem"
+FROM operations op
+INNER JOIN categories c ON op.category_id = c.id
+;
+
+-- 4. Valores gastos por categoria e sua porcentagem do total
+SELECT c.name, SUM(op.price) AS "Gasto", 
+	CAST(SUM(op.price)/(SELECT SUM(price) FROM operations)*100 AS DECIMAL(4,2)) AS "Porcentagem do Total"
+FROM operations op
+INNER JOIN categories c ON op.category_id = c.id
+-- WHERE op.category_id = 2 -- Para apresentar apenas uma categoria, com base no id
+GROUP BY c.name
+ORDER BY "Gasto" DESC
+;
+
+-- 5. Apresenta os tipos de compra, seus valores e a porcentagem de cada.
+SELECT b.name, SUM (op.price) AS "Gasto",
+	CAST(SUM(op.price)/(SELECT SUM(price) FROM operations)*100 AS DECIMAL(4,2)) AS "Porcentagem do Total"
+FROM operations op
+INNER JOIN buytypes b ON op.buytype_id = b.id
+GROUP BY b.name
+ORDER BY "Gasto" DESC
+;
+
+-- 6. Retorna os 5 destinos onde foi mais gasto dinheiro.
+SELECT d.name, SUM(op.price) AS "Gasto"
+FROM operations op
+INNER JOIN destinations d ON op.destination_id = d.id
+GROUP BY d.name
+ORDER BY "Gasto" DESC
+FETCH FIRST 5 ROWS ONLY
+;
+
+-- 7. Retorna os destinos mais repetidos.
+SELECT d.name, CAST(COUNT(op.id) AS INTEGER) AS "Repetições"
+FROM operations op
+INNER JOIN destinations d ON op.destination_id = d.id
+GROUP BY d.name
+ORDER BY "Repetições" DESC
+FETCH FIRST 5 ROWS ONLY
+;
+
+-- 8. Lista todos produtos e serviços diferentes.
+SELECT DISTINCT p.name, c.name
+FROM operations op
+INNER JOIN products p ON op.product_id = p.id
+INNER JOIN categories c ON op.category_id = c.id
+ORDER BY c.name DESC
+;
+
+-- 9. Retorna os produtos ou serviços que só foram comprados 1 vez.
+SELECT p.name AS "Produto"
+FROM operations op
+INNER JOIN products p ON op.product_id = p.id
+GROUP BY p.name
+HAVING COUNT(*) = 1
+ORDER BY p.name ASC
+;
+
+-- 10. Apresenta os dias da semana e mostra o número de transações em cada dia.
+SELECT TO_CHAR(op.date, 'Day') AS "Dia da Semana", CAST(COUNT(*) AS INTEGER)  AS "Transações"
+FROM operations op
+GROUP BY TO_CHAR(op.date, 'Day')
